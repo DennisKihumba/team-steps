@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join — Team Steps Savings Group</title>
+<meta name="description" content="Apply to join Team Steps: membership criteria, how contributions are collected today, and the application form.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500;1,9..144,600&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" type="image/jpeg" href="logo.jpeg">
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="brand">
+      <span class="brand-mark"><img src="logo.jpeg" alt="Team Steps logo"></span>
+      Team Steps
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+    <nav class="links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="governance.html">Governance</a>
+      <a href="join.html" class="active">Join</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <div class="nav-cta">
+      <a href="join.html" class="btn btn-primary">Join the climb</a>
+    </div>
+  </div>
+</header>
+
+<div class="page-header">
+  <div class="wrap">
+    <span class="eyebrow">Join Team Steps</span>
+    <h1>Take your first step</h1>
+    <p>We're 8 members strong and taking on up to 42 more. Here's what's expected of members, and how to apply.</p>
+  </div>
+</div>
+
+<section>
+  <div class="wrap join-grid">
+    <div>
+      <h2 style="font-size:1.4rem;">Membership criteria</h2>
+      <ul class="criteria-list">
+        <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Kenyan resident, 18 years or older, with a valid national ID</li>
+        <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Introduced or nominated by an existing member</li>
+        <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Approved by a majority vote of current members</li>
+        <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Willing and able to commit to the daily 50 KES save</li>
+        <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Willing and able to commit to the monthly 1,000 KES Boost</li>
+        <li><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Agrees to and signs our <a href="governance.html" style="color:var(--forest); text-decoration:underline;">governance rules</a></li>
+      </ul>
+
+      <div class="ladder-card small" style="margin-top:32px;">
+        <div class="cap">Membership progress</div>
+        <div class="count">08<span>/ 50</span></div>
+        <div class="ladder-rungs" data-total="50" data-filled="8" aria-label="8 of 50 rungs filled"></div>
+        <div class="ladder-foot">42 rungs left.</div>
+      </div>
+
+      <div class="note-box">
+        <strong>How to pay right now:</strong> send your contribution to our M-Pesa number <span class="mono">0796284514</span> and enter the M-Pesa code in the form below. The Treasurer verifies it and adds it to your account within a day. We're moving to an automatic Till/Paybill soon.
+      </div>
+    </div>
+
+    <form class="site-form" data-preview>
+      <div class="field"><label for="name">Full name</label><input id="name" required></div>
+      <div class="field"><label for="phone">Phone number</label><input id="phone" type="tel" required></div>
+      <div class="field"><label for="id">National ID number</label><input id="id" required></div>
+      <div class="field"><label for="nominator">Nominated by (existing member)</label><input id="nominator"></div>
+      <div class="field"><label for="code">M-Pesa code (if you've already sent your first save)</label><input id="code"></div>
+      <div class="field"><label for="why">Why do you want to join?</label><textarea id="why" rows="3"></textarea></div>
+      <div class="field" style="display:flex; align-items:flex-start; gap:10px;">
+        <input type="checkbox" id="agree" required style="width:auto; margin-top:4px;">
+        <label for="agree" style="margin:0;">I've read and agree to the <a href="governance.html" style="color:var(--forest);">governance rules</a>.</label>
+      </div>
+      <button class="btn btn-primary" type="submit" style="align-self:flex-start;">Submit application</button>
+      <div class="form-msg ok">Thanks — Coming soon.</div>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <div class="brand-row"><img src="logo.jpeg" alt="Team Steps logo"><strong style="font-family:'Fraunces', serif; color:var(--forest);">Team Steps</strong></div>
+      <div class="tag">"One team. One vision. Many steps. Endless possibilities."</div>
+      <div class="small">© <span class="js-year"></span> Team Steps Savings Group — step by step to financial freedom.</div>
+    </div>
+    <nav>
+      <a href="about.html">About</a>
+      <a href="governance.html">Governance</a>
+      <a href="join.html">Join</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
