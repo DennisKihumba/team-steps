@@ -52,11 +52,11 @@ header.nav{
 }
 .brand{ display:flex; align-items:center; gap:10px; font-family:'Fraunces', serif; font-weight:600; font-size:1.3rem; color:var(--forest); text-decoration:none; }
 .brand svg{ width:26px; height:26px; flex-shrink:0; }
-.brand-mark{ position:relative; width:38px; height:38px; flex-shrink:0; border-radius:50%; }
+.brand-mark{ position:relative; width:38px; height:38px; flex-shrink:0; border-radius:50%; --angle:0deg; }
 .brand-mark::before{
   content:""; position:absolute; inset:-3px; border-radius:50%;
-  background:conic-gradient(from 0deg, transparent 0 72%, var(--gold-light) 85%, var(--gold) 92%, transparent 100%);
-  animation:orbit-light 5s linear infinite;
+  background:conic-gradient(from var(--angle), var(--gold), var(--sage), var(--gold-light), var(--forest-dark), var(--gold));
+  animation:spin-angle 5s linear infinite;
 }
 .brand img{ position:relative; width:38px; height:38px; border-radius:50%; object-fit:cover; display:block; border:2px solid var(--cream); }
 footer .brand-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
@@ -76,7 +76,7 @@ nav.links a.active{ opacity:1; border-bottom-color:var(--gold); font-weight:600;
   }
   nav.links.open{ display:flex; }
   .nav-toggle{ display:block; }
-  .nav-cta .btn{ display:none; }
+  .nav-cta .btn-primary{ display:none; }
 }
 
 .btn{
@@ -114,19 +114,25 @@ nav.links a.active{ opacity:1; border-bottom-color:var(--gold); font-weight:600;
 .hero p.lead{ font-size:1.15rem; max-width:46ch; opacity:.88; margin-bottom:26px; }
 .hero-ctas{ display:flex; gap:14px; flex-wrap:wrap; }
 
-/* ---------- rotating "orbit light" signature ---------- */
-@keyframes orbit-light{ to{ transform:rotate(1turn); } }
+/* ---------- rotating gradient-ring signature ---------- */
+@property --angle{
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes spin-angle{ to{ --angle:360deg; } }
 
 .ladder-card, .math{
   position:relative;
   border-radius:8px;
   background:transparent;
   isolation:isolate;
+  --angle:0deg;
 }
 .ladder-card::before, .math::before{
   content:""; position:absolute; inset:-2px; border-radius:inherit; z-index:0;
-  background:conic-gradient(from 0deg, transparent 0 70%, var(--gold-light) 84%, var(--gold) 90%, transparent 100%);
-  animation:orbit-light 6s linear infinite;
+  background:conic-gradient(from var(--angle), var(--gold), var(--sage), var(--gold-light), var(--forest-dark), var(--gold));
+  animation:spin-angle 6s linear infinite;
 }
 .ladder-card::after, .math::after{
   content:""; position:absolute; inset:2px; border-radius:inherit; z-index:0;
@@ -139,14 +145,14 @@ nav.links a.active{ opacity:1; border-bottom-color:var(--gold); font-weight:600;
 .ladder-card .cap{ font-family:'IBM Plex Mono', monospace; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; opacity:.7; margin-bottom:4px; }
 .ladder-card .count{ font-family:'Fraunces', serif; font-size:2.4rem; font-weight:600; color:var(--gold-light); margin-bottom:2px; }
 .ladder-card .count span{ font-size:1.2rem; opacity:.65; font-weight:400; }
-.ladder-rungs{ display:flex; flex-direction:column-reverse; gap:5px; margin-top:18px; }
-.rung{ height:9px; border-radius:1px; background:rgba(246,240,222,0.14); }
-.rung.filled{ background:var(--gold-light); }
+
+/* Compact fill bar — fixed, small height no matter how many members the cap allows */
+.ladder-rungs{ position:relative; height:10px; border-radius:999px; background:rgba(246,240,222,0.14); margin-top:18px; overflow:hidden; }
+.ladder-fill{ height:100%; border-radius:inherit; background:linear-gradient(90deg, var(--gold), var(--gold-light)); transition:width .5s ease; }
 .ladder-foot{ margin-top:14px; font-size:.85rem; opacity:.75; }
 .ladder-card.small{ padding:22px 24px 18px; }
 .ladder-card.small .count{ font-size:1.9rem; }
-.ladder-card.small .ladder-rungs{ flex-direction:row; }
-.ladder-card.small .rung{ height:24px; width:6px; }
+.ladder-card.small .ladder-rungs{ height:8px; margin-top:14px; }
 
 @media (prefers-reduced-motion: reduce){
   .ladder-card::before, .math::before, .brand-mark::before{ animation:none; }
