@@ -38,21 +38,22 @@ async function apiFetch(path, options = {}) {
   return data;
 }
 
-
-
-// Mobile nav toggle
-// Render (or re-render) every ladder widget on the page from its data attributes
+// Render (or re-render) every ladder widget on the page from its data attributes.
+// Uses a single compact fill bar instead of one element per member — stays a fixed,
+// small height no matter how many members the cap grows to.
 function renderLadders() {
   document.querySelectorAll('.ladder-rungs[data-total]').forEach(el => {
     const total = parseInt(el.dataset.total, 10) || 50;
     const filled = parseInt(el.dataset.filled, 10) || 0;
-    el.innerHTML = '';
-    for (let i = 0; i < total; i++){
-      const r = document.createElement('div');
-      r.className = 'rung' + (i < filled ? ' filled' : '');
-      el.appendChild(r);
-    }
-    el.setAttribute('aria-label', `${filled} of ${total} rungs filled`);
+    const pct = Math.max(0, Math.min(100, (filled / total) * 100));
+
+    el.innerHTML = '<div class="ladder-fill"></div>';
+    el.querySelector('.ladder-fill').style.width = pct + '%';
+    el.setAttribute('role', 'progressbar');
+    el.setAttribute('aria-valuenow', filled);
+    el.setAttribute('aria-valuemin', '0');
+    el.setAttribute('aria-valuemax', total);
+    el.setAttribute('aria-label', `${filled} of ${total} members`);
   });
 }
 
