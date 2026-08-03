@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Officer Dashboard — Team Steps</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500;1,9..144,600&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" type="image/jpeg" href="logo.jpeg">
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="brand">
+      <span class="brand-mark"><img src="logo.jpeg" alt="Team Steps logo"></span>
+      Team Steps
+    </a>
+    <nav class="links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="governance.html">Governance</a>
+    </nav>
+    <div class="nav-cta">
+      <span id="officerName" class="mono" style="font-size:.85rem; opacity:.75; margin-right:14px;"></span>
+      <button class="btn btn-ghost" id="logoutBtn">Log out</button>
+    </div>
+  </div>
+</header>
+
+<div class="page-header">
+  <div class="wrap">
+    <span class="eyebrow">Officer dashboard</span>
+    <h1>Applications, contributions &amp; members</h1>
+    <p>Review new applications, confirm daily saves and Boosts, and keep an eye on the whole group — all in one place.</p>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+
+    <div class="dash-stats" id="statCards">
+      <div class="stat-card"><div class="lbl">Active members</div><div class="num" id="statMembers">–</div></div>
+      <div class="stat-card"><div class="lbl">Raised this month</div><div class="num" id="statMonth">–</div></div>
+      <div class="stat-card"><div class="lbl">Raised all-time</div><div class="num" id="statTotal">–</div></div>
+    </div>
+
+    <div class="dash-tabs">
+      <button class="dash-tab active" data-tab="applications">Applications</button>
+      <button class="dash-tab" data-tab="contributions">Contributions</button>
+      <button class="dash-tab" data-tab="members">Members</button>
+    </div>
+
+    <div class="dash-panel active" id="panel-applications">
+      <div id="applicationsList"><p class="empty-note">Loading…</p></div>
+    </div>
+
+    <div class="dash-panel" id="panel-contributions">
+      <div id="contributionsList"><p class="empty-note">Loading…</p></div>
+    </div>
+
+    <div class="dash-panel" id="panel-members">
+      <div id="membersTableWrap"><p class="empty-note">Loading…</p></div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <div class="brand-row"><img src="logo.jpeg" alt="Team Steps logo"><strong style="font-family:'Fraunces', serif; color:var(--forest);">Team Steps</strong></div>
+      <div class="small">© <span class="js-year"></span> Team Steps Savings Group — officer dashboard.</div>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  // ---- guard: officers only ----
+  if (!TeamStepsAuth.isOfficer()) {
+    window.location.href = 'login.html';
+  }
+  const auth = TeamStepsAuth.get();
+  document.getElementById('officerName').textContent = auth.member.fullName + ' · ' + auth.member.role;
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    TeamStepsAuth.clear();
+    window.location.href = 'login.html';
+  });
+
+  const kes = (n) => 'KES ' + Number(n || 0).toLocaleString();
+
+  // ---- tabs ----
+  document.querySelectorAll('.dash-tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.dash-tab').forEach((t) => t.classList.remove('active'));
+      document.querySelectorAll('.dash-panel').forEach((p) => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ---- stats ----
+  async function loadStats() {
+    try {
+      const [summary, count] = await Promise.all([
+        apiFetch('/contributions/summary/group'),
+        fetch(`${API_BASE}/members/count`).then((r) => r.json()),
+      ]);
+      document.getElementById('statMembers').textContent = `${count.active} / ${count.max}`;
+      document.getElementById('statMonth').textContent = kes(summary.totalThisMonth);
+      document.getElementById('statTotal').textContent = kes(summary.totalAllTime);
+    } catch (err) {
+      console.error('Failed to load stats:', err.message);
+    }
+  }
+
+  // ---- applications ----
+  async function loadApplications() {
+    const wrap = document.getElementById('applicationsList');
+    wrap.innerHTML = '<p class="empty-note">Loading…</p>';
+    try {
+      const { applications } = await apiFetch('/applications?status=pending');
+      if (!applications.length) {
+        wrap.innerHTML = '<p class="empty-note">No pending applications right now.</p>';
+        return;
+      }
+      wrap.innerHTML = applications.map((a) => `
+        <div class="list-row">
+          <div class="info">
+            <strong>${escapeHtml(a.fullName)} <span class="badge pending">pending</span></strong>
+            <span>${escapeHtml(a.phone)} · ID ${escapeHtml(a.nationalId)}</span>
+            ${a.nominatedBy ? `<span>Nominated by ${escapeHtml(a.nominatedBy)}</span>` : ''}
+            ${a.firstSaveMpesaCode ? `<span>First save M-Pesa code: ${escapeHtml(a.firstSaveMpesaCode)}</span>` : ''}
+            ${a.reason ? `<span>"${escapeHtml(a.reason)}"</span>` : ''}
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" onclick="approveApplication('${a._id}')">Approve</button>
+            <button class="btn btn-reject" onclick="rejectApplication('${a._id}')">Reject</button>
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      wrap.innerHTML = `<p class="empty-note">Couldn't load applications: ${escapeHtml(err.message)}</p>`;
+    }
+  }
+
+  async function approveApplication(id) {
+    const temporaryPassword = prompt('Set a temporary password for this new member (6+ characters). They can be told to change it once they have a login page.');
+    if (!temporaryPassword) return;
+    try {
+      await apiFetch(`/applications/${id}/approve`, {
+        method: 'POST',
+        body: JSON.stringify({ temporaryPassword }),
+      });
+      await Promise.all([loadApplications(), loadStats(), loadMembers()]);
+    } catch (err) {
+      alert('Could not approve: ' + err.message);
+    }
+  }
+
+  async function rejectApplication(id) {
+    const reason = prompt('Reason for rejecting (optional, shown only to officers):') || '';
+    try {
+      await apiFetch(`/applications/${id}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      });
+      await loadApplications();
+    } catch (err) {
+      alert('Could not reject: ' + err.message);
+    }
+  }
+
+  // ---- contributions ----
+  async function loadContributions() {
+    const wrap = document.getElementById('contributionsList');
+    wrap.innerHTML = '<p class="empty-note">Loading…</p>';
+    try {
+      const { contributions } = await apiFetch('/contributions?status=pending');
+      if (!contributions.length) {
+        wrap.innerHTML = '<p class="empty-note">No pending contributions to confirm.</p>';
+        return;
+      }
+      wrap.innerHTML = contributions.map((c) => `
+        <div class="list-row">
+          <div class="info">
+            <strong>${escapeHtml(c.member?.fullName || 'Unknown member')} <span class="badge pending">pending</span></strong>
+            <span>${c.type === 'boost' ? 'Boost' : 'Daily save'} · ${kes(c.amount)}</span>
+            <span>M-Pesa code: ${escapeHtml(c.mpesaCode || '—')}</span>
+            <span>${new Date(c.contributionDate).toLocaleDateString()}</span>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" onclick="confirmContribution('${c._id}')">Confirm</button>
+            <button class="btn btn-reject" onclick="rejectContribution('${c._id}')">Reject</button>
+          </div>
+        </div>
+      `).join('');
+    } catch (err) {
+      wrap.innerHTML = `<p class="empty-note">Couldn't load contributions: ${escapeHtml(err.message)}</p>`;
+    }
+  }
+
+  async function confirmContribution(id) {
+    try {
+      await apiFetch(`/contributions/${id}/confirm`, { method: 'POST' });
+      await Promise.all([loadContributions(), loadStats()]);
+    } catch (err) {
+      alert('Could not confirm: ' + err.message);
+    }
+  }
+
+  async function rejectContribution(id) {
+    if (!confirm('Reject this contribution claim?')) return;
+    try {
+      await apiFetch(`/contributions/${id}/reject`, { method: 'POST' });
+      await loadContributions();
+    } catch (err) {
+      alert('Could not reject: ' + err.message);
+    }
+  }
+
+  // ---- members ----
+  async function loadMembers() {
+    const wrap = document.getElementById('membersTableWrap');
+    wrap.innerHTML = '<p class="empty-note">Loading…</p>';
+    try {
+      const { members } = await apiFetch('/members');
+      if (!members.length) {
+        wrap.innerHTML = '<p class="empty-note">No members yet.</p>';
+        return;
+      }
+      wrap.innerHTML = `
+        <table class="member-table">
+          <thead><tr><th>Name</th><th>Phone</th><th>Role</th><th>Status</th><th>Joined</th><th></th></tr></thead>
+          <tbody>
+            ${members.map((m) => `
+              <tr>
+                <td>${escapeHtml(m.fullName)}</td>
+                <td>${escapeHtml(m.phone)}</td>
+                <td>${escapeHtml(m.role)}${m.officerRole ? ' · ' + escapeHtml(m.officerRole) : ''}</td>
+                <td><span class="badge ${m.status === 'active' ? 'confirmed' : 'rejected'}">${escapeHtml(m.status)}</span></td>
+                <td>${new Date(m.joinedDate).toLocaleDateString()}</td>
+                <td>
+                  ${m.role === 'member'
+                    ? `<button class="btn btn-ghost" style="padding:6px 12px; font-size:.8rem;" onclick="promoteMember('${m._id}')">Promote</button>`
+                    : m._id !== auth.member._id
+                      ? `<button class="btn btn-reject" style="padding:6px 12px; font-size:.8rem;" onclick="demoteMember('${m._id}')">Demote</button>`
+                      : '<span class="mono" style="font-size:.78rem; opacity:.5;">you</span>'
+                  }
+                  <button class="btn btn-ghost" style="padding:6px 12px; font-size:.8rem; margin-left:6px;" onclick="resetMemberPassword('${m._id}')">Reset password</button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    } catch (err) {
+      wrap.innerHTML = `<p class="empty-note">Couldn't load members: ${escapeHtml(err.message)}</p>`;
+    }
+  }
+
+  async function promoteMember(id) {
+    const role = prompt('Promote to which officer role? Type one of: chairperson, secretary, treasurer, IT');
+    if (!role) return;
+    const cleaned = role.trim().toLowerCase() === 'it' ? 'IT' : role.trim().toLowerCase();
+    if (!['chairperson', 'secretary', 'treasurer', 'IT'].includes(cleaned)) {
+      alert('Please type exactly one of: chairperson, secretary, treasurer, IT');
+      return;
+    }
+    try {
+      await apiFetch(`/members/${id}/promote`, {
+        method: 'POST',
+        body: JSON.stringify({ officerRole: cleaned }),
+      });
+      await loadMembers();
+    } catch (err) {
+      alert('Could not promote: ' + err.message);
+    }
+  }
+
+  async function demoteMember(id) {
+    if (!confirm('Remove officer access from this member?')) return;
+    try {
+      await apiFetch(`/members/${id}/demote`, { method: 'POST' });
+      await loadMembers();
+    } catch (err) {
+      alert('Could not demote: ' + err.message);
+    }
+  }
+
+  async function resetMemberPassword(id) {
+    const newPassword = prompt('Set a new password for this member (6+ characters). Tell them the new password directly — there is no email/SMS reset yet.');
+    if (!newPassword) return;
+    try {
+      await apiFetch(`/members/${id}/reset-password`, {
+        method: 'POST',
+        body: JSON.stringify({ newPassword }),
+      });
+      alert('Password reset. Let the member know their new password.');
+    } catch (err) {
+      alert('Could not reset password: ' + err.message);
+    }
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str ?? '';
+    return div.innerHTML;
+  }
+
+  loadStats();
+  loadApplications();
+  loadContributions();
+  loadMembers();
+</script>
+</body>
+</html>

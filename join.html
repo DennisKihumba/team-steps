@@ -26,6 +26,7 @@
       <a href="governance.html">Governance</a>
       <a href="join.html" class="active">Join</a>
       <a href="contact.html">Contact</a>
+      <a href="login.html">Login</a>
     </nav>
     <div class="nav-cta">
       <a href="join.html" class="btn btn-primary">Join the climb</a>
@@ -37,7 +38,7 @@
   <div class="wrap">
     <span class="eyebrow">Join Team Steps</span>
     <h1>Take your first step</h1>
-    <p>We're 8 members strong and taking on up to 42 more. Here's what's expected of members, and how to apply.</p>
+    <p>We're <span class="js-active">8</span> members strong and taking on up to <span class="js-remaining">42</span> more. Here's what's expected of members, and how to apply.</p>
   </div>
 </div>
 
@@ -56,9 +57,9 @@
 
       <div class="ladder-card small" style="margin-top:32px;">
         <div class="cap">Membership progress</div>
-        <div class="count">08<span>/ 50</span></div>
+        <div class="count"><span class="js-active-padded">08</span><span>/ <span class="js-max">50</span></span></div>
         <div class="ladder-rungs" data-total="50" data-filled="8" aria-label="8 of 50 rungs filled"></div>
-        <div class="ladder-foot">42 rungs left.</div>
+        <div class="ladder-foot"><span class="js-remaining">42</span> rungs left.</div>
       </div>
 
       <div class="note-box">
@@ -66,7 +67,7 @@
       </div>
     </div>
 
-    <form class="site-form" data-preview>
+    <form class="site-form" id="joinForm">
       <div class="field"><label for="name">Full name</label><input id="name" required></div>
       <div class="field"><label for="phone">Phone number</label><input id="phone" type="tel" required></div>
       <div class="field"><label for="id">National ID number</label><input id="id" required></div>
@@ -78,7 +79,7 @@
         <label for="agree" style="margin:0;">I've read and agree to the <a href="governance.html" style="color:var(--forest);">governance rules</a>.</label>
       </div>
       <button class="btn btn-primary" type="submit" style="align-self:flex-start;">Submit application</button>
-      <div class="form-msg ok">Thanks — Coming soon.</div>
+      <div class="form-msg" id="joinMsg"></div>
     </form>
   </div>
 </section>
@@ -95,10 +96,55 @@
       <a href="governance.html">Governance</a>
       <a href="join.html">Join</a>
       <a href="contact.html">Contact</a>
+      <a href="login.html">Login</a>
     </nav>
   </div>
 </footer>
 
 <script src="script.js"></script>
+<script>
+  document.getElementById('joinForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const msg = document.getElementById('joinMsg');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    const payload = {
+      fullName: document.getElementById('name').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      nationalId: document.getElementById('id').value.trim(),
+      nominatedBy: document.getElementById('nominator').value.trim(),
+      firstSaveMpesaCode: document.getElementById('code').value.trim(),
+      reason: document.getElementById('why').value.trim(),
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+
+    try {
+      const res = await fetch(`${API_BASE}/applications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+
+      msg.textContent = "Thanks — your application has been received. An officer will review it and reach out once it's approved.";
+      msg.classList.remove('error');
+      msg.classList.add('show', 'ok');
+      form.reset();
+    } catch (err) {
+      msg.textContent = err.message.includes('fetch')
+        ? "Couldn't reach the server — check your connection and try again."
+        : err.message;
+      msg.classList.remove('ok');
+      msg.classList.add('show', 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit application';
+    }
+  });
+</script>
 </body>
 </html>

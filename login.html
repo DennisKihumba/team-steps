@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log in — Team Steps</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500;1,9..144,600&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" type="image/jpeg" href="logo.jpeg">
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="brand">
+      <span class="brand-mark"><img src="logo.jpeg" alt="Team Steps logo"></span>
+      Team Steps
+    </a>
+    <nav class="links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="governance.html">Governance</a>
+      <a href="join.html">Join</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="auth-card">
+      <span class="eyebrow">Member &amp; officer login</span>
+      <h1 style="margin-top:14px;">Log in</h1>
+      <p class="sub">Use the phone number and password from your approved application.</p>
+
+      <form class="site-form" id="loginForm">
+        <div class="field"><label for="phone">Phone number</label><input id="phone" type="tel" required></div>
+        <div class="field"><label for="password">Password</label><input id="password" type="password" required></div>
+        <button class="btn btn-primary" type="submit" style="width:100%; justify-content:center;">Log in</button>
+        <div class="form-msg" id="loginMsg"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <div class="brand-row"><img src="logo.jpeg" alt="Team Steps logo"><strong style="font-family:'Fraunces', serif; color:var(--forest);">Team Steps</strong></div>
+      <div class="tag">"One team. One vision. Many steps. Endless possibilities."</div>
+      <div class="small">© <span class="js-year"></span> Team Steps Savings Group — step by step to financial freedom.</div>
+    </div>
+    <nav>
+      <a href="about.html">About</a>
+      <a href="governance.html">Governance</a>
+      <a href="join.html">Join</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  // Already logged in? Skip straight to the right dashboard.
+  const existing = TeamStepsAuth.get();
+  if (existing) {
+    window.location.href = ['officer', 'admin'].includes(existing.member.role) ? 'admin.html' : 'member.html';
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('loginMsg');
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Logging in…';
+
+    try {
+      const phone = document.getElementById('phone').value.trim();
+      const password = document.getElementById('password').value;
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Login failed');
+
+      TeamStepsAuth.save(data.token, data.member);
+      window.location.href = ['officer', 'admin'].includes(data.member.role) ? 'admin.html' : 'member.html';
+    } catch (err) {
+      msg.textContent = err.message;
+      msg.classList.remove('ok');
+      msg.classList.add('show', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Log in';
+    }
+  });
+</script>
+</body>
+</html>
