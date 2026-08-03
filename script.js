@@ -2,7 +2,7 @@
 
 // Change this once the backend is deployed somewhere other than your machine
 // (e.g. https://team-steps-api.onrender.com/api)
-const API_BASE = 'http://localhost:4000/api';
+const API_BASE = 'https://team-steps-backend.onrender.com/api';
 
 // --- Auth helpers, shared by login.html and admin.html ---
 const TeamStepsAuth = {
